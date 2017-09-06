@@ -1,0 +1,40 @@
+<link rel="import" href="../polymer/polymer-element.html">
+
+<dom-module id="image-uploader">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+  </template>
+
+  <script>
+    /**
+     * `image-uploader`
+     *
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class ImageUploader extends Polymer.Element {
+      /**
+       * @return {string}
+       */
+      static get is() {
+        return 'image-uploader';
+      }
+
+      /**
+       * @return {Object}
+       */
+      static get properties() {
+        return {};
+      }
+    }
+
+    window.customElements.define(ImageUploader.is, ImageUploader);
+  </script>
+</dom-module>
