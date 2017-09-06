@@ -1,4 +1,7 @@
 <link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../paper-fab/paper-fab.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-icons/image-icons.html">
 
 <dom-module id="image-uploader">
   <template>
@@ -6,8 +9,22 @@
       :host {
         display: block;
       }
+      .image-placeholder {
+        /* position: fixed;
+        top: 0;
+        left: 0; */
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        fill: #333;
+    }
     </style>
-
+    <svg class="image-placeholder" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+    </svg>
+    <input id="fileInput" type="file" accept="image/*" capture="user">
+    <paper-fab icon="image:photo-camera" mini on-tap="_uploadImage"></paper-fab>
+    <p>Has image: {{hasImage}} {{imageDataUrl}}</p>
   </template>
 
   <script>
@@ -26,15 +43,60 @@
       static get is() {
         return 'image-uploader';
       }
-
       /**
        * @return {Object}
        */
       static get properties() {
-        return {};
+        return {
+          imageDataUrl: {
+            type: Object
+          },
+          hasImage: {
+            type: Boolean,
+            computed: '_isDefined(imageDataUrl)',
+            reflectToAttribute: true
+          }
+        };
+      }
+      connectedCallback() {
+        super.connectedCallback();
+        requestAnimationFrame(() => {
+          const lazyImports = document.createElement('link');
+          lazyImports.rel = 'import';
+          lazyImports.href = '/lazy-imports.html';
+          document.head.appendChild(lazyImports);
+        });
+      }
+      ready() {
+        super.ready();
+        this.shadowRoot.querySelector('#fileInput').addEventListener('change', e => this._upload(e.target));
+      }
+      _upload(target) {
+        console.log('_upload');
+        const file = target.files ? target.files[0] : null;
+        if (!file) {
+          return;
+        }
+        window.loadImage(file, (canvas) => {
+          if (this.imageDataUrl) {
+            setTimeout(() => {
+              this.imageDataUrl = canvas.toDataURL('image/jpeg');
+            }, 450);
+          } else {
+            this.imageDataUrl = canvas.toDataURL('image/jpeg');
+          }
+        });
+        // Reset to allow uploads of the same file again.
+        target.value = '';
+      }
+      _isDefined(data) {
+        return !!data;
+      }
+      _uploadImage() {
+        this.shadowRoot.querySelector('#fileInput').click();
       }
     }
-
     window.customElements.define(ImageUploader.is, ImageUploader);
+
   </script>
 </dom-module>
