@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
@@ -10,21 +11,28 @@
 
   <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
   <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+  <link rel="import" href="../../polymerfire/polymerfire.html">
   <link rel="import" href="../image-uploader.html">
 
   <custom-style>
     <style is="custom-style" include="demo-pages-shared-styles">
+
+
     </style>
   </custom-style>
 </head>
+
 <body>
-<div class="vertical-section-container centered">
-  <h3>Basic image-uploader demo</h3>
-  <demo-snippet>
-    <template>
+  <firebase-app auth-domain="ph-staging-c3f40.firebaseapp.com" database-url="https://ph-staging-c3f40.firebaseio.com" api-key="AIzaSyAWZ2ax6AK7BRty2CVHTME6oNShBJaDkPI" storage-bucket="ph-staging-c3f40.appspot.com">
+  </firebase-app>
+  <div class="vertical-section-container centered">
+    <h3>Basic image-uploader demo</h3>
+    <demo-snippet>
+      <template>
       <image-uploader></image-uploader>
     </template>
-  </demo-snippet>
-</div>
+    </demo-snippet>
+  </div>
 </body>
+
 </html>
