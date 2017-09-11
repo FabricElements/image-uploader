@@ -13,17 +13,19 @@
       :host {
         display: block;
       }
+
       .image-placeholder {
         width: 100%;
         height: 100%;
         object-fit: contain;
         fill: #333;
       }
-      .uploader{
+
+      .uploader {
         position: relative;
       }
 
-      .uploaderImage iron-image{
+      .uploaderImage iron-image {
         display: block;
         min-height: 232px;
         min-width: 232px;
@@ -34,7 +36,8 @@
         };
         @apply --image-styles;
       }
-      #uploadImage{
+
+      #uploadImage {
         @apply --upload-icon-styles;
       }
     </style>
@@ -49,16 +52,17 @@
       <div class="uploaderImage">
         <template is="dom-if" if="[[!hasImage]]">
           <svg class="image-placeholder" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            <path
+              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
           </svg>
         </template>
-        <template is="dom-if" if="[[hasImage]]">
+  <template is="dom-if" if="[[hasImage]]">
           <iron-image src="[[imageDataUrl]]" preload fade sizing="cover"></iron-image>
         </template>
-      </div>
-      <input id="fileInput" type="file" accept="image/*" capture="user" style="display:none;">
-      <paper-fab id="uploadImage" icon="image:photo-camera" mini on-tap="_uploadImage"></paper-fab>
-    </div>
+  </div>
+  <input id="fileInput" type="file" accept="image/*" capture="user" style="display:none;">
+  <paper-fab id="uploadImage" icon="image:photo-camera" mini on-tap="_uploadImage"></paper-fab>
+  </div>
   </template>
 
   <script>
@@ -83,25 +87,31 @@
       static get properties() {
         return {
           imageDataUrl: {
-            type: Object
+            type: Object,
           },
           hasImage: {
             type: Boolean,
             value: false,
             computed: '_isDefined(imageDataUrl)',
-            reflectToAttribute: true
+            reflectToAttribute: true,
           },
           downloadUrl: {
+            type: String,
+          },
+          gsUri: {
             type: String,
           },
           metadata: {
             type: Object,
             value: {
-              contentType: 'image/jpeg'
-            }
+              contentType: 'image/jpeg',
+            },
           },
         };
       }
+      /**
+       * Connected callback
+       */
       connectedCallback() {
         super.connectedCallback();
         requestAnimationFrame(() => {
@@ -111,23 +121,33 @@
           document.head.appendChild(lazyImports);
         });
       }
+      /**
+       * Ready function
+       */
       ready() {
         super.ready();
-        this.shadowRoot.querySelector('#fileInput').addEventListener('change', e => this._upload(e.target));
+        this.shadowRoot.querySelector('#fileInput')
+          .addEventListener('change', (e) => this._upload(e.target));
       }
+      /**
+       * Upload file.
+       * @param {object} target
+       * @private
+       */
       _upload(target) {
-        console.log('_upload');
         const file = target.files ? target.files[0] : null;
         if (!file) {
           return;
         }
-        console.log(file);
-        this.shadowRoot.querySelector('#firebase-storage-ref').put(file, this.metadata);
+        this.shadowRoot.querySelector('#firebase-storage-ref')
+          .put(file, this.metadata);
         window.loadImage(file, (canvas) => {
           if (this.imageDataUrl) {
             setTimeout(() => {
-              this.imageDataUrl = canvas.toDataURL('image/jpeg');
-            }, 450);
+                this.imageDataUrl = canvas.toDataURL('image/jpeg');
+              },
+              450
+            );
           } else {
             this.imageDataUrl = canvas.toDataURL('image/jpeg');
           }
@@ -135,9 +155,19 @@
         // Reset to allow uploads of the same file again.
         target.value = '';
       }
+      /**
+       * Check if data is defined
+       * @param {object} data
+       * @return {boolean}
+       * @private
+       */
       _isDefined(data) {
         return !!data;
       }
+      /**
+       * Trigger click to upload image
+       * @private
+       */
       _uploadImage() {
         this.shadowRoot.querySelector('#fileInput').click();
       }
