@@ -6,6 +6,7 @@
 <link rel="import" href="../polymer/lib/elements/dom-if.html">
 <link rel="import" href="../polymerfire/polymerfire.html">
 <link rel="import" href="../paper-styles/color.html">
+<link rel="import" href="load-image.html">
 
 <dom-module id="image-uploader">
   <template>
@@ -114,12 +115,6 @@
        */
       connectedCallback() {
         super.connectedCallback();
-        requestAnimationFrame(() => {
-          const lazyImports = document.createElement('link');
-          lazyImports.rel = 'import';
-          lazyImports.href = '/lazy-imports.html';
-          document.head.appendChild(lazyImports);
-        });
       }
       /**
        * Ready function
