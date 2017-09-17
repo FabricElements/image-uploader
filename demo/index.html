@@ -11,6 +11,8 @@
 
   <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
   <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+  <link rel="import" href="../../polymer/lib/elements/dom-bind.html">
+  <link rel="import" href="../../polymer/lib/elements/dom-if.html">
   <link rel="import" href="../../polymerfire/polymerfire.html">
   <link rel="import" href="../image-uploader.html">
 
@@ -23,16 +25,47 @@
 </head>
 
 <body>
-  <firebase-app auth-domain="ph-staging-c3f40.firebaseapp.com" database-url="https://ph-staging-c3f40.firebaseio.com" api-key="AIzaSyAWZ2ax6AK7BRty2CVHTME6oNShBJaDkPI" storage-bucket="ph-staging-c3f40.appspot.com">
-  </firebase-app>
-  <div class="vertical-section-container centered">
-    <h3>Basic image-uploader demo</h3>
-    <demo-snippet>
+<!-- Configure Firebase app: -->
+<firebase-app
+  auth-domain="fabricelements.firebaseapp.com"
+  database-url="https://fabricelements.firebaseio.com"
+  api-key="AIzaSyCJRNdR0eodnswyi8MHCtF1YOjY235mhM8"
+  storage-bucket="fabricelements.appspot.com"
+  messagingSenderId="908593247251"
+></firebase-app>
+<dom-bind>
+  <template>
+    <firebase-auth
+      signed-in="{{signedIn}}"
+      user="{{user}}"
+      on-error="handleError">
+    </firebase-auth>
+
+    <dom-if if="[[!signedIn]]">
       <template>
-      <image-uploader></image-uploader>
+        <skeleton-auth google></skeleton-auth>
+      </template>
+    </dom-if>
+  </template>
+</dom-bind>
+
+<div class="vertical-section-container centered">
+  <h3>Basic image-uploader demo</h3>
+  <demo-snippet>
+    <template>
+      <image-uploader name="demo" disabled$="[[!signedIn]]"></image-uploader>
     </template>
-    </demo-snippet>
-  </div>
+  </demo-snippet>
+</div>
+
+<div class="vertical-section-container centered">
+  <h3>Basic image-uploader demo</h3>
+  <demo-snippet>
+    <template>
+      <image-uploader name="demo" disabled$="[[!signedIn]]" circle></image-uploader>
+    </template>
+  </demo-snippet>
+</div>
 </body>
 
 </html>
