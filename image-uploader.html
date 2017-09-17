@@ -1,69 +1,101 @@
 <link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../polymerfire/firebase-storage-script.html">
 <link rel="import" href="../paper-fab/paper-fab.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
 <link rel="import" href="../iron-icons/image-icons.html">
 <link rel="import" href="../iron-image/iron-image.html">
-<link rel="import" href="../polymer/lib/elements/dom-if.html">
-<link rel="import" href="../polymerfire/polymerfire.html">
 <link rel="import" href="../paper-styles/color.html">
-<link rel="import" href="load-image.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="./load-image.html">
+<link rel="import" href="../polymer/lib/mixins/gesture-event-listeners.html">
 
 <dom-module id="image-uploader">
   <template>
     <style is="custom-style">
       :host {
         display: block;
-      }
-
-      .image-placeholder {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        fill: #333;
-      }
-
-      .uploader {
+        padding-bottom: 40%;
         position: relative;
       }
 
-      .uploaderImage iron-image {
+      #imageContainer {
         display: block;
-        min-height: 232px;
-        min-width: 232px;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 100%;
+        z-index: 1;
+        overflow: hidden;
+      }
+
+      :host([circle]) {
+        padding-bottom: 100%;
+      }
+      :host([circle]) #imageContainer,
+      :host([circle]) iron-image {
+        border-radius: 50%;
+      }
+
+      iron-image {
+        display: block;
+        position: relative;
+        cursor: pointer;
+        z-index: 3;
+        height: 100%;
         --iron-image-width: 100%;
         --iron-image-height: auto;
         --iron-image-placeholder: {
           background-color: var(--paper-grey-900);
         };
-        @apply --image-styles;
+        /*@apply --image-styles;*/
       }
 
-      #uploadImage {
-        @apply --upload-icon-styles;
+      paper-fab {
+        position: absolute;
+        z-index: 3;
+        bottom: 0;
+        right: 0;
+        /*@apply --upload-icon-styles;*/
+      }
+
+      input {
+        display: none;
       }
     </style>
-    <firebase-storage-ref
-      id="firebase-storage-ref"
-      path="/images/profiles"
-      metadata="{{metadata}}"
-      storage-uri="{{gsUri}}"
-      download-url="{{downloadUrl}}">
-    </firebase-storage-ref>
-    <div class="uploader">
-      <div class="uploaderImage">
-        <template is="dom-if" if="[[!hasImage]]">
-          <svg class="image-placeholder" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-          </svg>
-        </template>
-  <template is="dom-if" if="[[hasImage]]">
-          <iron-image src="[[imageDataUrl]]" preload fade sizing="cover"></iron-image>
-        </template>
-  </div>
-  <input id="fileInput" type="file" accept="image/*" capture="user" style="display:none;">
-  <paper-fab id="uploadImage" icon="image:photo-camera" mini on-tap="_uploadImage"></paper-fab>
-  </div>
+
+    <iron-ajax id="vision"
+               method="post"
+               headers='{"content-type":"application/json","cache-control":"no-cache"}'
+               handle-as="json"
+               url="https://vision.googleapis.com/v1/images:annotate?key=AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
+               on-response="_visionResponse"
+               on-error="_visionError"
+               debounce-duration="300"
+               hidden
+    ></iron-ajax>
+    <input id="media-capture"
+           type="file"
+           accept="image/jpeg,image/jpg"
+           on-change="_initialize"
+           hidden
+           capture="user">
+    <div id="imageContainer">
+      <iron-image id="imagePreview" src$="{{imagePreview}}"
+                  sizing="cover"
+                  position="center"
+                  preload
+                  fade
+                  on-tap="_initiatePictureCapture"
+                  disabled$="{{uploading}}"></iron-image>
+    </div>
+
+    <paper-fab id="uploadImage"
+               icon="image:photo-camera"
+               mini
+               on-tap="_initiatePictureCapture"
+               disabled$="[[disabled]]"
+    ></paper-fab>
   </template>
 
   <script>
@@ -75,18 +107,23 @@
      * @polymer
      * @demo demo/index.html
      */
-    class ImageUploader extends Polymer.Element {
+    class ImageUploader extends Polymer.GestureEventListeners(Polymer.Element) {
       /**
        * @return {string}
        */
       static get is() {
         return 'image-uploader';
       }
+
       /**
        * @return {Object}
        */
       static get properties() {
         return {
+          path: {
+            type: String,
+            value: null,
+          },
           imageDataUrl: {
             type: Object,
           },
@@ -96,11 +133,52 @@
             computed: '_isDefined(imageDataUrl)',
             reflectToAttribute: true,
           },
-          downloadUrl: {
-            type: String,
+          imageAnalysing: {
+            type: Boolean,
+            value: false,
           },
-          gsUri: {
+          uploading: {
+            type: Boolean,
+            value: false,
+          },
+          uploadProgress: {
+            type: Number,
+            reflectToAttribute: true,
+            value: null,
+          },
+          imagePreview: {
             type: String,
+            value: null,
+          },
+          imageVisionError: {
+            type: Boolean,
+            value: false,
+          },
+          imageSafe: {
+            type: Boolean,
+            value: true,
+            // eslint-disable-next-line max-len
+            compute: '_validateImages(imageVisionError, imageUnsafeAdult, imageUnsafeSpoof, imageUnsafeMedical, imageUnsafeViolence)',
+          },
+          imageUnsafeLogos: {
+            type: Boolean,
+            value: false,
+          },
+          imageUnsafeAdult: {
+            type: Boolean,
+            value: false,
+          },
+          imageUnsafeSpoof: {
+            type: Boolean,
+            value: false,
+          },
+          imageUnsafeMedical: {
+            type: Boolean,
+            value: false,
+          },
+          imageUnsafeViolence: {
+            type: Boolean,
+            value: false,
           },
           metadata: {
             type: Object,
@@ -108,65 +186,309 @@
               contentType: 'image/jpeg',
             },
           },
+          disabled: {
+            type: Boolean,
+            value: false,
+          },
         };
       }
+
       /**
-       * Connected callback
-       */
-      connectedCallback() {
-        super.connectedCallback();
-      }
-      /**
-       * Ready function
-       */
-      ready() {
-        super.ready();
-        this.shadowRoot.querySelector('#fileInput')
-          .addEventListener('change', (e) => this._upload(e.target));
-      }
-      /**
-       * Upload file.
-       * @param {object} target
+       * Start taking a picture.
+       *
        * @private
        */
-      _upload(target) {
-        const file = target.files ? target.files[0] : null;
-        if (!file) {
-          return;
-        }
-        this.shadowRoot.querySelector('#firebase-storage-ref')
-          .put(file, this.metadata);
-        window.loadImage(file, (canvas) => {
-          if (this.imageDataUrl) {
-            setTimeout(() => {
-                this.imageDataUrl = canvas.toDataURL('image/jpeg');
-              },
-              450
-            );
-          } else {
-            this.imageDataUrl = canvas.toDataURL('image/jpeg');
-          }
-        });
-        // Reset to allow uploads of the same file again.
-        target.value = '';
+      _initiatePictureCapture() {
+        this.shadowRoot.querySelector('input').click();
       }
+
       /**
-       * Check if data is defined
-       * @param {object} data
+       * Initialize the image capture
+       *
+       * @param {object} event
+       * @private
+       */
+      _initialize(event) {
+        this._resetImageProperties();
+        const image = this.shadowRoot.querySelector('#media-capture').files[0];
+
+//        this._createImage(image);
+        this._setImagePreview(image);
+      }
+
+      /**
+       * Upload a single image
+       *
+       * @param {string} image
+       * @param {string} location
+       * @private
+       */
+      _uploadImage(image, location) {
+        // create a storage reference
+        const storage = firebase.storage().ref(location);
+        // Upload the file
+        const uploadTask = storage.put(image);
+
+        uploadTask.on('state_changed', (snapshot) => {
+          // Observe state change events such as progress, pause, and resume
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          this.uploadProgress = progress;
+          switch (snapshot.state) {
+            case firebase.storage.TaskState.PAUSED: // or 'paused'
+              console.log('Upload is paused');
+              break;
+            case firebase.storage.TaskState.RUNNING: // or 'running'
+              console.log('Upload is running');
+              break;
+          }
+        }, (error) => {
+          // Handle unsuccessful uploads
+        }, () => {
+          // Handle successful uploads on complete
+          // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+          let downloadURL = uploadTask.snapshot.downloadURL;
+          console.log(downloadURL);
+        });
+      }
+
+      /**
+       * Preview the image
+       *
+       * @param {any} image
+       * @return {Promise}
+       * @private
+       */
+      _imagePreview(image) {
+      }
+
+      /**
+       * set image preview
+       *
+       * @param {string} imageObject
+       * @private
+       */
+      _setImagePreview(imageObject) {
+        loadImage(
+          imageObject,
+          (img) => {
+            const finalImage = img.toDataURL('image/jpeg');
+            this.imagePreview = finalImage;
+//            this._vision(finalImage);
+          },
+          {
+            maxWidth: 1000,
+            maxHeight: 1000,
+            minWidth: 600,
+            minHeight: 600,
+            canvas: true,
+          }
+        );
+      }
+
+      /**
+       * set image preview
+       *
+       * @param {string} imageObject
+       * @private
+       */
+      _createImage(imageObject) {
+        loadImage(
+          imageObject,
+          (data) => {
+            const image = this._toBlob(data);
+            this._uploadImage(image, 'demo.jpg');
+          },
+          {
+            maxWidth: 2500,
+            maxHeight: 2500,
+            minWidth: 300,
+            minHeight: 300,
+            canvas: true,
+            crop: false,
+            meta: true,
+          }
+        );
+      }
+
+      /**
+       * Blob the image to be able to upload
+       *
+       * @param canvas
+       * @param type
+       * @param quality
+       * @returns {*}
+       * @private
+       */
+      _toBlob(canvas, type = 'image/jpeg', quality = 0.9) {
+        const binStr = atob(canvas.toDataURL(type, quality).split(',')[1]);
+        const len = binStr.length;
+        const arr = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          arr[i] = binStr.charCodeAt(i);
+        }
+        return new Blob([arr], {type: type || 'image/jpeg'});
+      }
+
+      /**
+       * Clear uploader
+       *
+       * @private
+       */
+      _clearUpload() {
+        this.uploading = false;
+        this.uploadProgress = 0;
+      }
+
+      /**
+       * Reset the image properties
+       *
+       * @private
+       */
+      _resetImageProperties() {
+        this.imageAnalysing = true;
+        this.imageVisionError = false;
+        this.imageUnsafeLogos = false;
+        this.imageUnsafeAdult = false;
+        this.imageUnsafeSpoof = false;
+        this.imageUnsafeMedical = false;
+        this.imageUnsafeViolence = false;
+      }
+
+      /**
+       * Call vision to validate and prepare the image
+       *
+       * @param {string} image
+       * @private
+       */
+      _vision(image) {
+        // Reformat image
+        const finalImage = image.replace(/^data:image\/[a-z]+;base64,/, '');
+        this._visionFormat(finalImage);
+      }
+
+      /**
+       * Set the json object for the Google Cloud Vision Request
+       *
+       * @param {string} image
+       * @private
+       */
+      _visionFormat(image) {
+        const data = JSON.stringify({
+          'requests': [
+            {
+              'image': {
+                'content': image,
+              },
+              'features': [
+                {
+                  'type': 'SAFE_SEARCH_DETECTION',
+                  'maxResults': 1,
+                },
+              ],
+            },
+          ],
+        });
+        this._sendVisionRequest(data);
+      }
+
+      /**
+       * Send request to Google Cloud Vision
+       *
+       * @param {object} bodyData
+       * @private
+       */
+      _sendVisionRequest(bodyData) {
+        const vision = this.shadowRoot.querySelector('#vision');
+        vision.body = bodyData;
+        vision.generateRequest();
+      }
+
+      /**
+       * Parse the response from Google Cloud Vision
+       *
+       * @param {object} response
+       * @private
+       */
+      _visionResponse(response) {
+        let responses = response.detail.response.responses[0];
+        if (!!responses) {
+//          console.log('apiResponse:', JSON.stringify(responses, null, 2));
+          const safeSearchAnnotation = responses.safeSearchAnnotation;
+          if (safeSearchAnnotation) {
+            this._validateSafeImage(safeSearchAnnotation);
+          }
+        }
+        this.imageAnalysing = false;
+      }
+
+      /**
+       * Validate the image and check if is safe to upload.
+       * @param {object} safeSearchAnnotation
+       * @private
+       */
+      _validateSafeImage(safeSearchAnnotation) {
+        const isAdult = this._checkSafe(safeSearchAnnotation.adult);
+        const isSpoof = this._checkSafe(safeSearchAnnotation.spoof);
+        const isMedical = this._checkSafe(safeSearchAnnotation.medical);
+        const isViolence = this._checkSafe(safeSearchAnnotation.violence);
+        if (isAdult) {
+          this.imageUnsafeAdult = true;
+        }
+        if (isSpoof) {
+          this.imageUnsafeSpoof = true;
+        }
+        if (isMedical) {
+          this.imageUnsafeMedical = true;
+        }
+        if (isViolence) {
+          this.imageUnsafeViolence = true;
+        }
+      }
+
+      /**
+       * Handle error from Google Cloud Vision
+       * @private
+       * @param {object} error
+       */
+      _visionError(error) {
+        console.error('vision', error);
+        this.imageVisionError = true;
+      }
+
+      /**
+       * @param {object} Likelihood
        * @return {boolean}
        * @private
        */
-      _isDefined(data) {
-        return !!data;
+      _checkSafe(Likelihood) {
+        const unsafeImages = ['UNKNOWN', 'POSSIBLE', 'LIKELY', 'VERY_LIKELY'];
+        let i = unsafeImages.length;
+        while (i--) {
+          if (Likelihood === unsafeImages[i]) {
+//              alert("it's a match");
+            return true;
+          }
+        }
+        return false;
+//          alert("it's not a match");
       }
+
       /**
-       * Trigger click to upload image
+       * Validate the post fields and the images
+       *
+       * @param {boolean} visionError
+       * @param {boolean} adult
+       * @param {boolean} spoof
+       * @param {boolean} medical
+       * @param {boolean} violence
+       * @return {boolean}
        * @private
        */
-      _uploadImage() {
-        this.shadowRoot.querySelector('#fileInput').click();
+      _validateImages(visionError, adult, spoof, medical, violence) {
+        return !visionError && !adult && !spoof && !medical && !violence;
       }
     }
+
     window.customElements.define(ImageUploader.is, ImageUploader);
 
   </script>
