@@ -1,8 +1,5 @@
 <link rel="import" href="../polymer/polymer-element.html">
 <link rel="import" href="../polymerfire/firebase-storage-script.html">
-<link rel="import" href="../paper-fab/paper-fab.html">
-<link rel="import" href="../iron-icons/iron-icons.html">
-<link rel="import" href="../iron-icons/image-icons.html">
 <link rel="import" href="../iron-image/iron-image.html">
 <link rel="import" href="../paper-styles/color.html">
 <link rel="import" href="../iron-ajax/iron-ajax.html">
@@ -63,16 +60,16 @@
         display: none;
       }
     </style>
-
     <iron-ajax id="vision"
                method="post"
                headers='{"content-type":"application/json","cache-control":"no-cache"}'
                handle-as="json"
-               url="https://vision.googleapis.com/v1/images:annotate?key=AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
+               url$="https://vision.googleapis.com/v1/images:annotate?key=[[vision]]"
                on-response="_visionResponse"
                on-error="_visionError"
                debounce-duration="300"
                hidden
+               disabled$="[[!vision]]"
     ></iron-ajax>
     <input id="media-capture"
            type="file"
@@ -86,16 +83,10 @@
                   position="center"
                   preload
                   fade
-                  on-tap="_initiatePictureCapture"
-                  disabled$="{{uploading}}"></iron-image>
+                  on-tap="capture"
+                  disabled$="{{uploading}}"
+                  placeholder$="[[placeholder]]"></iron-image>
     </div>
-
-    <paper-fab id="uploadImage"
-               icon="image:photo-camera"
-               mini
-               on-tap="_initiatePictureCapture"
-               disabled$="[[disabled]]"
-    ></paper-fab>
   </template>
 
   <script>
@@ -114,7 +105,6 @@
       static get is() {
         return 'image-uploader';
       }
-
       /**
        * @return {Object}
        */
@@ -158,7 +148,7 @@
             type: Boolean,
             value: true,
             // eslint-disable-next-line max-len
-            compute: '_validateImages(imageVisionError, imageUnsafeAdult, imageUnsafeSpoof, imageUnsafeMedical, imageUnsafeViolence)',
+            computed: '_validateImages(imageVisionError, imageUnsafeAdult, imageUnsafeSpoof, imageUnsafeMedical, imageUnsafeViolence)',
           },
           imageUnsafeLogos: {
             type: Boolean,
@@ -180,28 +170,57 @@
             type: Boolean,
             value: false,
           },
+          contentType: {
+            type: String,
+            value: 'image/jpeg',
+          },
           metadata: {
             type: Object,
             value: {
               contentType: 'image/jpeg',
+              customMetadata: {}
             },
+          },
+          finalMetadata: {
+            type: Object,
+            computed: '_computedMetadata(metadata, contentType)'
           },
           disabled: {
             type: Boolean,
             value: false,
           },
+          path: {
+            type: String,
+            value: null,
+          },
+          vision:{
+            type: String,
+            value: null,
+          },
+          placeholder:{
+            type: String,
+            value: null,
+          }
         };
       }
-
+      _computedMetadata(metadata, contentType) {
+        if (!metadata) return {
+          contentType: 'image/jpeg',
+          customMetadata: {}
+        };
+        let fileMetadata = {};
+        fileMetadata = metadata;
+        fileMetadata.contentType = contentType;
+        return fileMetadata;
+      }
       /**
        * Start taking a picture.
        *
        * @private
        */
-      _initiatePictureCapture() {
+      capture() {
         this.shadowRoot.querySelector('input').click();
       }
-
       /**
        * Initialize the image capture
        *
@@ -211,11 +230,8 @@
       _initialize(event) {
         this._resetImageProperties();
         const image = this.shadowRoot.querySelector('#media-capture').files[0];
-
-//        this._createImage(image);
         this._setImagePreview(image);
       }
-
       /**
        * Upload a single image
        *
@@ -227,8 +243,7 @@
         // create a storage reference
         const storage = firebase.storage().ref(location);
         // Upload the file
-        const uploadTask = storage.put(image);
-
+        const uploadTask = storage.put(image, this.finalMetadata);
         uploadTask.on('state_changed', (snapshot) => {
           // Observe state change events such as progress, pause, and resume
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -250,7 +265,6 @@
           console.log(downloadURL);
         });
       }
-
       /**
        * Preview the image
        *
@@ -258,9 +272,7 @@
        * @return {Promise}
        * @private
        */
-      _imagePreview(image) {
-      }
-
+      _imagePreview(image) {}
       /**
        * set image preview
        *
@@ -273,9 +285,9 @@
           (img) => {
             const finalImage = img.toDataURL('image/jpeg');
             this.imagePreview = finalImage;
-//            this._vision(finalImage);
-          },
-          {
+            if(!this.vision) return this._createImage();
+            this._vision(finalImage);
+          }, {
             maxWidth: 1000,
             maxHeight: 1000,
             minWidth: 600,
@@ -284,21 +296,19 @@
           }
         );
       }
-
       /**
        * set image preview
        *
-       * @param {string} imageObject
        * @private
        */
-      _createImage(imageObject) {
+      _createImage() {
+        const imageObject = this.shadowRoot.querySelector('#media-capture').files[0];
         loadImage(
           imageObject,
           (data) => {
             const image = this._toBlob(data);
-            this._uploadImage(image, 'demo.jpg');
-          },
-          {
+            this._uploadImage(image, this.path);
+          }, {
             maxWidth: 2500,
             maxHeight: 2500,
             minWidth: 300,
@@ -309,7 +319,6 @@
           }
         );
       }
-
       /**
        * Blob the image to be able to upload
        *
@@ -326,9 +335,10 @@
         for (let i = 0; i < len; i++) {
           arr[i] = binStr.charCodeAt(i);
         }
-        return new Blob([arr], {type: type || 'image/jpeg'});
+        return new Blob([arr], {
+          type: type || 'image/jpeg'
+        });
       }
-
       /**
        * Clear uploader
        *
@@ -338,7 +348,6 @@
         this.uploading = false;
         this.uploadProgress = 0;
       }
-
       /**
        * Reset the image properties
        *
@@ -353,7 +362,6 @@
         this.imageUnsafeMedical = false;
         this.imageUnsafeViolence = false;
       }
-
       /**
        * Call vision to validate and prepare the image
        *
@@ -365,7 +373,6 @@
         const finalImage = image.replace(/^data:image\/[a-z]+;base64,/, '');
         this._visionFormat(finalImage);
       }
-
       /**
        * Set the json object for the Google Cloud Vision Request
        *
@@ -374,23 +381,18 @@
        */
       _visionFormat(image) {
         const data = JSON.stringify({
-          'requests': [
-            {
-              'image': {
-                'content': image,
-              },
-              'features': [
-                {
-                  'type': 'SAFE_SEARCH_DETECTION',
-                  'maxResults': 1,
-                },
-              ],
+          'requests': [{
+            'image': {
+              'content': image,
             },
-          ],
+            'features': [{
+              'type': 'SAFE_SEARCH_DETECTION',
+              'maxResults': 1,
+            }, ],
+          }, ],
         });
         this._sendVisionRequest(data);
       }
-
       /**
        * Send request to Google Cloud Vision
        *
@@ -402,7 +404,6 @@
         vision.body = bodyData;
         vision.generateRequest();
       }
-
       /**
        * Parse the response from Google Cloud Vision
        *
@@ -412,7 +413,7 @@
       _visionResponse(response) {
         let responses = response.detail.response.responses[0];
         if (!!responses) {
-//          console.log('apiResponse:', JSON.stringify(responses, null, 2));
+          //          console.log('apiResponse:', JSON.stringify(responses, null, 2));
           const safeSearchAnnotation = responses.safeSearchAnnotation;
           if (safeSearchAnnotation) {
             this._validateSafeImage(safeSearchAnnotation);
@@ -420,7 +421,6 @@
         }
         this.imageAnalysing = false;
       }
-
       /**
        * Validate the image and check if is safe to upload.
        * @param {object} safeSearchAnnotation
@@ -443,8 +443,12 @@
         if (isViolence) {
           this.imageUnsafeViolence = true;
         }
+        if (!isAdult && !isSpoof && !isMedical && !isViolence) {
+          this._createImage();
+        }else{
+          console.error('Image is unsafe');
+        }
       }
-
       /**
        * Handle error from Google Cloud Vision
        * @private
@@ -454,7 +458,6 @@
         console.error('vision', error);
         this.imageVisionError = true;
       }
-
       /**
        * @param {object} Likelihood
        * @return {boolean}
@@ -465,14 +468,13 @@
         let i = unsafeImages.length;
         while (i--) {
           if (Likelihood === unsafeImages[i]) {
-//              alert("it's a match");
+            //              alert("it's a match");
             return true;
           }
         }
         return false;
-//          alert("it's not a match");
+        //          alert("it's not a match");
       }
-
       /**
        * Validate the post fields and the images
        *
@@ -488,7 +490,6 @@
         return !visionError && !adult && !spoof && !medical && !violence;
       }
     }
-
     window.customElements.define(ImageUploader.is, ImageUploader);
 
   </script>
