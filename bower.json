@@ -1,6 +1,6 @@
 {
-  "name": "image-uploader",
-  "main": "image-uploader.html",
+  "name": "skeleton-image-uploader",
+  "main": "skeleton-image-uploader.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0",
     "paper-fab": "PolymerElements/paper-fab#^2.0.0",

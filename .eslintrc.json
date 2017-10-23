@@ -20,10 +20,8 @@
     "new-cap": [
       "error",
       {
-        "capIsNewExceptions": [
-          "Polymer",
-          "Polymer.GestureEventListeners"
-        ]
+        "newIsCap": true,
+        "properties": false
       }
     ],
     "no-var": "error",
@@ -53,7 +51,7 @@
     "fixture": true,
     "MockInteractions": true,
     "WCT": true,
-    "loadImage": true,
-    "firebase": true
+    "firebase": true,
+    "loadImage": true
   }
 }

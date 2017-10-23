@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-  <title>image-uploader demo</title>
+  <title>skeleton-image-uploader demo</title>
 
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
 
@@ -17,7 +17,8 @@
   <link rel="import" href="../../paper-fab/paper-fab.html">
   <link rel="import" href="../../iron-icons/iron-icons.html">
   <link rel="import" href="../../iron-icons/image-icons.html">
-  <link rel="import" href="../image-uploader.html">
+  <link rel="import" href="../../skeleton-auth/skeleton-auth.html">
+  <link rel="import" href="../skeleton-image-uploader.html">
 
   <custom-style>
     <style is="custom-style" include="demo-pages-shared-styles">
@@ -53,16 +54,18 @@
 </dom-bind>
 
 <div class="vertical-section-container centered">
-  <h3>Basic image-uploader demo</h3>
+  <h3>Basic skeleton-image-uploader demo</h3>
   <demo-snippet>
     <template>
-      <image-uploader id="demo1" disabled$="[[!signedIn]]" content-type="image/jpeg" metadata='{"customMetadata":{"type":"avatar"}}' path="demo.jpg" vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4" placeholder="./placeholder.jpg"></image-uploader>
-      <paper-fab id="uploadImage"
-      icon="image:photo-camera"
-      mini
-      onclick="capture('demo1')"
-      disabled$="[[disabled]]"
-></paper-fab>
+      <skeleton-image-uploader id="demo1" disabled$="[[!signedIn]]" content-type="image/jpeg"
+                               metadata='{"customMetadata":{"type":"avatar"}}' path="demo.jpg"
+                               vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
+                               placeholder="./placeholder.jpg"></skeleton-image-uploader>
+      <paper-fab icon="image:photo-camera"
+                 mini
+                 onclick="capture('demo1');"
+                 disabled$="[[disabled]]"
+      ></paper-fab>
     </template>
   </demo-snippet>
 
@@ -70,16 +73,18 @@
 
 
 <div class="vertical-section-container centered">
-  <h3>Basic image-uploader demo</h3>
+  <h3>Basic skeleton-image-uploader demo</h3>
   <demo-snippet>
     <template>
-      <image-uploader id="demo2" disabled$="[[!signedIn]]" circle content-type="image/jpeg" metadata='{"customMetadata":{"type":"avatar"}}' path="demo.jpg" vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4" placeholder="./placeholder.jpg"></image-uploader>
-      <paper-fab id="uploadImage"
-      icon="image:photo-camera"
-      mini
-      onclick="capture('demo2')"
-      disabled$="[[disabled]]"
-></paper-fab>
+      <skeleton-image-uploader id="demo2" disabled$="[[!signedIn]]" circle content-type="image/jpeg"
+                               metadata='{"customMetadata":{"type":"avatar"}}' path="demo.jpg"
+                               vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
+                               placeholder="./placeholder.jpg"></skeleton-image-uploader>
+      <paper-fab icon="image:photo-camera"
+                 mini
+                 onclick="capture('demo2');"
+                 disabled$="[[disabled]]"
+      ></paper-fab>
     </template>
   </demo-snippet>
 </div>
@@ -88,8 +93,9 @@
   /* eslint-disable no-unused-vars */
 
   /**
-   * capture
+   * Capture
    *
+   * @param {string} id
    */
   function capture(id) {
     const element = this.document.getElementById(id);

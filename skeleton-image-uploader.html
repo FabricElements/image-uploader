@@ -1,14 +1,14 @@
 <link rel="import" href="../polymer/polymer-element.html">
-<link rel="import" href="../polymerfire/firebase-storage-script.html">
-<link rel="import" href="../iron-image/iron-image.html">
+<link rel="import" href="../polymer/lib/mixins/gesture-event-listeners.html">
 <link rel="import" href="../paper-styles/color.html">
+<link rel="import" href="../iron-image/iron-image.html">
 <link rel="import" href="../iron-ajax/iron-ajax.html">
 <link rel="import" href="./load-image.html">
-<link rel="import" href="../polymer/lib/mixins/gesture-event-listeners.html">
+<link rel="import" href="../polymerfire/firebase-storage-script.html">
 
-<dom-module id="image-uploader">
+<dom-module id="skeleton-image-uploader">
   <template>
-    <style is="custom-style">
+    <style>
       :host {
         display: block;
         padding-bottom: 40%;
@@ -29,6 +29,7 @@
       :host([circle]) {
         padding-bottom: 100%;
       }
+
       :host([circle]) #imageContainer,
       :host([circle]) iron-image {
         border-radius: 50%;
@@ -90,21 +91,24 @@
   </template>
 
   <script>
+    /* eslint-disable max-len */
+
     /**
-     * `image-uploader`
+     * `skeleton-image-uploader`
      *
      *
      * @customElement
      * @polymer
      * @demo demo/index.html
      */
-    class ImageUploader extends Polymer.GestureEventListeners(Polymer.Element) {
+    class SkeletonImageUploader extends Polymer.GestureEventListeners(Polymer.Element) {
       /**
        * @return {string}
        */
       static get is() {
-        return 'image-uploader';
+        return 'skeleton-image-uploader';
       }
+
       /**
        * @return {Object}
        */
@@ -116,12 +120,6 @@
           },
           imageDataUrl: {
             type: Object,
-          },
-          hasImage: {
-            type: Boolean,
-            value: false,
-            computed: '_isDefined(imageDataUrl)',
-            reflectToAttribute: true,
           },
           imageAnalysing: {
             type: Boolean,
@@ -178,41 +176,28 @@
             type: Object,
             value: {
               contentType: 'image/jpeg',
-              customMetadata: {}
+              customMetadata: {},
             },
           },
           finalMetadata: {
             type: Object,
-            computed: '_computedMetadata(metadata, contentType)'
+            computed: '_computedMetadata(metadata, contentType)',
           },
           disabled: {
             type: Boolean,
             value: false,
           },
-          path: {
+          vision: {
             type: String,
             value: null,
           },
-          vision:{
+          placeholder: {
             type: String,
             value: null,
           },
-          placeholder:{
-            type: String,
-            value: null,
-          }
         };
       }
-      _computedMetadata(metadata, contentType) {
-        if (!metadata) return {
-          contentType: 'image/jpeg',
-          customMetadata: {}
-        };
-        let fileMetadata = {};
-        fileMetadata = metadata;
-        fileMetadata.contentType = contentType;
-        return fileMetadata;
-      }
+
       /**
        * Start taking a picture.
        *
@@ -221,6 +206,7 @@
       capture() {
         this.shadowRoot.querySelector('input').click();
       }
+
       /**
        * Initialize the image capture
        *
@@ -232,6 +218,7 @@
         const image = this.shadowRoot.querySelector('#media-capture').files[0];
         this._setImagePreview(image);
       }
+
       /**
        * Upload a single image
        *
@@ -265,14 +252,7 @@
           console.log(downloadURL);
         });
       }
-      /**
-       * Preview the image
-       *
-       * @param {any} image
-       * @return {Promise}
-       * @private
-       */
-      _imagePreview(image) {}
+
       /**
        * set image preview
        *
@@ -285,7 +265,7 @@
           (img) => {
             const finalImage = img.toDataURL('image/jpeg');
             this.imagePreview = finalImage;
-            if(!this.vision) return this._createImage();
+            if (!this.vision) return this._createImage();
             this._vision(finalImage);
           }, {
             maxWidth: 1000,
@@ -296,15 +276,19 @@
           }
         );
       }
+
       /**
        * set image preview
        *
        * @private
        */
       _createImage() {
-        const imageObject = this.shadowRoot.querySelector('#media-capture').files[0];
+        const imageObject = this.shadowRoot.querySelector('#media-capture');
+        const imageRoute = imageObject.files[0];
+        if (!imageRoute) return;
+
         loadImage(
-          imageObject,
+          imageRoute,
           (data) => {
             const image = this._toBlob(data);
             this._uploadImage(image, this.path);
@@ -319,13 +303,14 @@
           }
         );
       }
+
       /**
        * Blob the image to be able to upload
        *
-       * @param canvas
-       * @param type
-       * @param quality
-       * @returns {*}
+       * @param {object} canvas
+       * @param {string} type
+       * @param {number} quality
+       * @return {*}
        * @private
        */
       _toBlob(canvas, type = 'image/jpeg', quality = 0.9) {
@@ -336,9 +321,10 @@
           arr[i] = binStr.charCodeAt(i);
         }
         return new Blob([arr], {
-          type: type || 'image/jpeg'
+          type: type || 'image/jpeg',
         });
       }
+
       /**
        * Clear uploader
        *
@@ -348,6 +334,7 @@
         this.uploading = false;
         this.uploadProgress = 0;
       }
+
       /**
        * Reset the image properties
        *
@@ -362,6 +349,7 @@
         this.imageUnsafeMedical = false;
         this.imageUnsafeViolence = false;
       }
+
       /**
        * Call vision to validate and prepare the image
        *
@@ -373,6 +361,7 @@
         const finalImage = image.replace(/^data:image\/[a-z]+;base64,/, '');
         this._visionFormat(finalImage);
       }
+
       /**
        * Set the json object for the Google Cloud Vision Request
        *
@@ -388,11 +377,12 @@
             'features': [{
               'type': 'SAFE_SEARCH_DETECTION',
               'maxResults': 1,
-            }, ],
-          }, ],
+            }],
+          }],
         });
         this._sendVisionRequest(data);
       }
+
       /**
        * Send request to Google Cloud Vision
        *
@@ -404,6 +394,7 @@
         vision.body = bodyData;
         vision.generateRequest();
       }
+
       /**
        * Parse the response from Google Cloud Vision
        *
@@ -412,8 +403,7 @@
        */
       _visionResponse(response) {
         let responses = response.detail.response.responses[0];
-        if (!!responses) {
-          //          console.log('apiResponse:', JSON.stringify(responses, null, 2));
+        if (responses) {
           const safeSearchAnnotation = responses.safeSearchAnnotation;
           if (safeSearchAnnotation) {
             this._validateSafeImage(safeSearchAnnotation);
@@ -421,6 +411,7 @@
         }
         this.imageAnalysing = false;
       }
+
       /**
        * Validate the image and check if is safe to upload.
        * @param {object} safeSearchAnnotation
@@ -445,10 +436,11 @@
         }
         if (!isAdult && !isSpoof && !isMedical && !isViolence) {
           this._createImage();
-        }else{
+        } else {
           console.error('Image is unsafe');
         }
       }
+
       /**
        * Handle error from Google Cloud Vision
        * @private
@@ -458,6 +450,7 @@
         console.error('vision', error);
         this.imageVisionError = true;
       }
+
       /**
        * @param {object} Likelihood
        * @return {boolean}
@@ -468,13 +461,12 @@
         let i = unsafeImages.length;
         while (i--) {
           if (Likelihood === unsafeImages[i]) {
-            //              alert("it's a match");
             return true;
           }
         }
         return false;
-        //          alert("it's not a match");
       }
+
       /**
        * Validate the post fields and the images
        *
@@ -489,8 +481,29 @@
       _validateImages(visionError, adult, spoof, medical, violence) {
         return !visionError && !adult && !spoof && !medical && !violence;
       }
+
+      /**
+       * Compute metadata
+       * @param {object} metadata
+       * @param {string} contentType
+       * @return {*}
+       * @private
+       */
+      _computedMetadata(metadata, contentType) {
+        if (!metadata) {
+          return {
+            contentType: 'image/jpeg',
+            customMetadata: {},
+          };
+        }
+        let fileMetadata = {};
+        fileMetadata = metadata;
+        fileMetadata.contentType = contentType;
+        return fileMetadata;
+      }
     }
-    window.customElements.define(ImageUploader.is, ImageUploader);
+
+    window.customElements.define(SkeletonImageUploader.is, SkeletonImageUploader);
 
   </script>
 </dom-module>
