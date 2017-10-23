@@ -79,7 +79,7 @@
            hidden
            capture="user">
     <div id="imageContainer">
-      <iron-image id="imagePreview" src$="{{imagePreview}}"
+      <iron-image src$="{{src}}"
                   sizing="cover"
                   position="center"
                   preload
@@ -134,7 +134,7 @@
             reflectToAttribute: true,
             value: null,
           },
-          imagePreview: {
+          src: {
             type: String,
             value: null,
           },
@@ -264,7 +264,7 @@
           imageObject,
           (img) => {
             const finalImage = img.toDataURL('image/jpeg');
-            this.imagePreview = finalImage;
+            this.src = finalImage;
             if (!this.vision) return this._createImage();
             this._vision(finalImage);
           }, {
