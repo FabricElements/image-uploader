@@ -115,7 +115,7 @@
         <div
           id="progress-bar"
           class$="uploaded-[[uploaded]]"
-          style$="width:[[uploadProgress]]%;"
+          style$="width:[[maxValue]]%;"
         ></div>
       </template>
     </div>
@@ -164,6 +164,11 @@
             type: Number,
             reflectToAttribute: true,
             value: null,
+          },
+          maxValue: {
+            type: Number,
+            value: null,
+            computed: '_maxValue(value, uploadProgress)'
           },
           uploaded: {
             type: Boolean,
@@ -299,6 +304,18 @@
        */
       _getUploaded(uploadProgress) {
         return uploadProgress === 100;
+      }
+
+      /**
+       * max value
+       *
+       * @param {number} value
+       * @param {number} uploadProgress
+       * @private
+       * @return {*}
+       */
+       _maxValue(value, uploadProgress) {
+        return Math.max(5, uploadProgress);
       }
 
       /**
