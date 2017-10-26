@@ -279,19 +279,20 @@
           this.uploadProgress = progress;
           switch (snapshot.state) {
             case firebase.storage.TaskState.PAUSED: // or 'paused'
-              console.log('Upload is paused');
+              this._dispatchEvent('paused', 'Upload is paused');
               break;
             case firebase.storage.TaskState.RUNNING: // or 'running'
-              console.log('Upload is running');
+              this._dispatchEvent('running', 'Upload is running');
               break;
           }
         }, (error) => {
+          this._dispatchEvent('error', error);
           // Handle unsuccessful uploads
         }, () => {
           // Handle successful uploads on complete
           // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+          this._dispatchEvent('completed', downloadURL);
           let downloadURL = uploadTask.snapshot.downloadURL;
-          console.log(downloadURL);
         });
       }
 
@@ -502,7 +503,7 @@
         if (!isAdult && !isSpoof && !isMedical && !isViolence) {
           this._createImage();
         } else {
-          console.error('Image is unsafe');
+          this._dispatchEvent('validation-error', 'Image is unsafe');
         }
       }
 
@@ -512,7 +513,7 @@
        * @param {object} error
        */
       _visionError(error) {
-        console.error('vision', error);
+        this._dispatchEvent('vision', error);
         this.imageVisionError = true;
       }
 
@@ -565,6 +566,21 @@
         fileMetadata = metadata;
         fileMetadata.contentType = contentType;
         return fileMetadata;
+      }
+
+      /**
+       * Dispatch event
+       *
+       * @param {string} event
+       * @param  {string} detail
+       * @private
+       */
+       _dispatchEvent(event, detail) {
+        this.dispatchEvent(new CustomEvent(event, {
+          detail: detail,
+          bubbles: true,
+          composed: true,
+        }));
       }
     }
 
