@@ -10,6 +10,7 @@
   <template>
     <style>
       :host {
+        --progress-overlay-color: var(--paper-grey-800);
         display: block;
         padding-bottom: 40%;
         position: relative;
@@ -24,6 +25,23 @@
         height: 100%;
         z-index: 1;
         overflow: hidden;
+      }
+
+      #progress-bar {
+        background-color: var(--progress-overlay-color);
+        bottom: 0;
+        left: 0;
+        opacity: 1;
+        pointer-events: none;
+        position: absolute;
+        top: 0;
+        transition: all 100ms linear;
+        z-index: 10;
+      }
+
+      #progress-bar.uploaded-true {
+        opacity: 0;
+        transition-duration: 100ms;
       }
 
       :host([circle]) {
@@ -61,32 +79,45 @@
         display: none;
       }
     </style>
-    <iron-ajax id="vision"
-               method="post"
-               headers='{"content-type":"application/json","cache-control":"no-cache"}'
-               handle-as="json"
-               url$="https://vision.googleapis.com/v1/images:annotate?key=[[vision]]"
-               on-response="_visionResponse"
-               on-error="_visionError"
-               debounce-duration="300"
-               hidden
-               disabled$="[[!vision]]"
+    <iron-ajax 
+      id="vision"
+      method="post"
+      headers='{"content-type":"application/json","cache-control":"no-cache"}'
+      handle-as="json"
+      url$="https://vision.googleapis.com/v1/images:annotate?key=[[vision]]"
+      on-response="_visionResponse"
+      on-error="_visionError"
+      debounce-duration="300"
+      hidden
+      disabled$="[[!vision]]"
     ></iron-ajax>
+
     <input id="media-capture"
            type="file"
            accept="image/jpeg,image/jpg"
            on-change="_initialize"
            hidden
            capture="user">
+
     <div id="imageContainer">
-      <iron-image src$="{{src}}"
-                  sizing="cover"
-                  position="center"
-                  preload
-                  fade
-                  on-tap="capture"
-                  disabled$="{{uploading}}"
-                  placeholder$="[[placeholder]]"></iron-image>
+      <iron-image 
+        src$="{{src}}"
+        sizing="cover"
+        position="center"
+        preload
+        fade
+        on-tap="capture"
+        disabled$="{{uploading}}"
+        placeholder$="[[placeholder]]"
+      ></iron-image>
+      
+      <template is="dom-if" if="{{src}}">
+        <div
+          id="progress-bar"
+          class$="uploaded-[[uploaded]]"
+          style$="width:[[uploadProgress]]%;"
+        ></div>
+      </template>
     </div>
   </template>
 
@@ -133,6 +164,11 @@
             type: Number,
             reflectToAttribute: true,
             value: null,
+          },
+          uploaded: {
+            type: Boolean,
+            value: false,
+            computed: '_getUploaded(uploadProgress)',
           },
           src: {
             type: String,
@@ -231,6 +267,7 @@
         const storage = firebase.storage().ref(location);
         // Upload the file
         const uploadTask = storage.put(image, this.finalMetadata);
+
         uploadTask.on('state_changed', (snapshot) => {
           // Observe state change events such as progress, pause, and resume
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -251,6 +288,17 @@
           let downloadURL = uploadTask.snapshot.downloadURL;
           console.log(downloadURL);
         });
+      }
+
+      /**
+       * get uploaded
+       *
+       * @param {number} uploadProgress
+       * @private
+       * @return {*}
+       */
+      _getUploaded(uploadProgress) {
+        return uploadProgress === 100;
       }
 
       /**
