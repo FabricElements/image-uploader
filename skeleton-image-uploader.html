@@ -79,7 +79,7 @@
         display: none;
       }
     </style>
-    <iron-ajax 
+    <iron-ajax
       id="vision"
       method="post"
       headers='{"content-type":"application/json","cache-control":"no-cache"}'
@@ -94,13 +94,13 @@
 
     <input id="media-capture"
            type="file"
-           accept="image/jpeg,image/jpg"
+           accept="image/*"
            on-change="_initialize"
            hidden
-           capture="user">
+           capture$="[[capture]]">
 
     <div id="imageContainer">
-      <iron-image 
+      <iron-image
         src$="{{src}}"
         sizing="cover"
         position="center"
@@ -110,7 +110,7 @@
         disabled$="{{uploading}}"
         placeholder$="[[placeholder]]"
       ></iron-image>
-      
+
       <template is="dom-if" if="{{src}}">
         <div
           id="progress-bar"
@@ -236,11 +236,15 @@
             type: String,
             value: null,
           },
+          capture: {
+            type: String,
+            value: null,
+          },
         };
       }
 
       /**
-       * Start taking a picture.
+       j * Start taking a picture.
        *
        * @private
        */
@@ -315,7 +319,7 @@
        * @private
        * @return {*}
        */
-       _maxValue(value, uploadProgress) {
+      _maxValue(value, uploadProgress) {
         return Math.max(5, uploadProgress);
       }
 
@@ -575,7 +579,7 @@
        * @param  {string} detail
        * @private
        */
-       _dispatchEvent(event, detail) {
+      _dispatchEvent(event, detail) {
         this.dispatchEvent(new CustomEvent(event, {
           detail: detail,
           bubbles: true,
