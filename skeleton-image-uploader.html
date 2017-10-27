@@ -97,7 +97,7 @@
            accept="image/*"
            on-change="_initialize"
            hidden
-           capture$="[[capture]]">
+           capture="[[captureMethod]]">
 
     <div id="imageContainer">
       <iron-image
@@ -123,6 +123,7 @@
 
   <script>
     /* eslint-disable max-len */
+    /* eslint-disable-next-line max-len */
 
     /**
      * `skeleton-image-uploader`
@@ -186,7 +187,6 @@
           imageSafe: {
             type: Boolean,
             value: true,
-            // eslint-disable-next-line max-len
             computed: '_validateImages(imageVisionError, imageUnsafeAdult, imageUnsafeSpoof, imageUnsafeMedical, imageUnsafeViolence)',
           },
           imageUnsafeLogos: {
@@ -236,9 +236,9 @@
             type: String,
             value: null,
           },
-          capture: {
+          captureMethod: {
             type: String,
-            value: null,
+            value: '',
           },
         };
       }
