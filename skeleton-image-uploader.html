@@ -295,8 +295,8 @@
         }, () => {
           // Handle successful uploads on complete
           // For instance, get the download URL: https://firebasestorage.googleapis.com/...
-          this._dispatchEvent('completed', downloadURL);
           let downloadURL = uploadTask.snapshot.downloadURL;
+          this._dispatchEvent('completed', downloadURL);
         });
       }
 
