@@ -315,22 +315,22 @@
       connectedCallback() {
         super.connectedCallback();
         const dropzone = this.shadowRoot.querySelector('#image-container');
-        
+
         dropzone.ondrop = (e) => {
           e.preventDefault();
           this.className = 'image-container';
-          console.log(e.dataTransfer.files)
-        }
+          console.log(e.dataTransfer.files);
+        };
 
-        dropzone.ondragover = function () {
+        dropzone.ondragover = function() {
           this.className = 'image-container dragover';
           return false;
-        }
+        };
 
-        dropzone.ondragleave = function () {
+        dropzone.ondragleave = function() {
           this.className = 'image-container';
           return false;
-        }
+        };
       }
 
       /**
