@@ -16,7 +16,7 @@
         position: relative;
       }
 
-      #imageContainer {
+      #image-container {
         display: block;
         position: absolute;
         left: 0;
@@ -25,6 +25,11 @@
         bottom: 0;
         z-index: 1;
         overflow: hidden;
+      }
+      
+      /*Just for testing purpose*/
+      #image-container.dragover {
+        border: 2px solid #000; 
       }
 
       .progress {
@@ -74,7 +79,7 @@
         padding-bottom: 100%;
       }
 
-      :host([circle]) #imageContainer,
+      :host([circle]) #image-container,
       :host([circle]) iron-image {
         border-radius: 50%;
       }
@@ -125,7 +130,7 @@
            hidden
            capture="[[captureMethod]]">
 
-    <div id="imageContainer">
+    <div id="image-container">
       <iron-image
         src$="{{src}}"
         sizing="cover"
@@ -302,6 +307,30 @@
             value: '',
           },
         };
+      }
+
+      /**
+       * Ready event
+       */
+      connectedCallback() {
+        super.connectedCallback();
+        const dropzone = this.shadowRoot.querySelector('#image-container');
+        
+        dropzone.ondrop = (e) => {
+          e.preventDefault();
+          this.className = 'image-container';
+          console.log(e.dataTransfer.files)
+        }
+
+        dropzone.ondragover = function () {
+          this.className = 'image-container dragover';
+          return false;
+        }
+
+        dropzone.ondragleave = function () {
+          this.className = 'image-container';
+          return false;
+        }
       }
 
       /**
