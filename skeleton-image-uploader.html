@@ -16,7 +16,7 @@
         position: relative;
       }
 
-      #imageContainer {
+      #image-container {
         display: block;
         position: absolute;
         left: 0;
@@ -25,6 +25,11 @@
         bottom: 0;
         z-index: 1;
         overflow: hidden;
+      }
+      
+      #image-container.dragover {
+        border: 1px solid var(--progress-overlay-color);
+        transition: all .3s;
       }
 
       .progress {
@@ -74,7 +79,7 @@
         padding-bottom: 100%;
       }
 
-      :host([circle]) #imageContainer,
+      :host([circle]) #image-container,
       :host([circle]) iron-image {
         border-radius: 50%;
       }
@@ -125,7 +130,7 @@
            hidden
            capture="[[captureMethod]]">
 
-    <div id="imageContainer">
+    <div id="image-container" class="image-container">
       <iron-image
         src$="{{src}}"
         sizing="cover"
@@ -305,6 +310,28 @@
       }
 
       /**
+       * Ready event
+       */
+      connectedCallback() {
+        super.connectedCallback();
+        const dropzone = this.shadowRoot.querySelector('#image-container');
+
+        dropzone.ondrop = (e) => {
+          e.preventDefault();
+          dropzone.classList.remove('dragover');
+          this._initialize(e, e.dataTransfer.files[0]);
+        };
+
+        dropzone.ondragover = function() {
+          return false;
+        };
+
+        dropzone.ondragleave = function() {
+          return false;
+        };
+      }
+
+      /**
        j * Start taking a picture.
        *
        * @private
@@ -317,11 +344,16 @@
        * Initialize the image capture
        *
        * @param {object} event
+       * @param {object} fileObject
        * @private
        */
-      _initialize(event) {
+      _initialize(event, fileObject) {
         this._resetImageProperties();
-        const image = this.shadowRoot.querySelector('#media-capture').files[0];
+        const image = fileObject
+          ? fileObject
+          : this.shadowRoot.querySelector('#media-capture').files[0];
+
+        this._imageObject = image;
         this._setImagePreview(image);
       }
 
@@ -414,12 +446,11 @@
       /**
        * set image preview
        *
-       * @param {string} imageObject
        * @private
        */
-      _setImagePreview(imageObject) {
+      _setImagePreview() {
         loadImage(
-          imageObject,
+          this._imageObject,
           (img) => {
             const finalImage = img.toDataURL('image/jpeg');
             this.src = finalImage;
@@ -438,15 +469,14 @@
       /**
        * set image preview
        *
+       * @param {string} image
        * @private
        */
-      _createImage() {
-        const imageObject = this.shadowRoot.querySelector('#media-capture');
-        const imageRoute = imageObject.files[0];
-        if (!imageRoute) return;
+      _createImage(image) {
+        if (!this._imageObject) return;
 
         loadImage(
-          imageRoute,
+          this._imageObject,
           (data) => {
             const image = this._toBlob(data);
             this._uploadImage(image, this.path);
