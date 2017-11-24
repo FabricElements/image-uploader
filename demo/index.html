@@ -23,7 +23,11 @@
   <custom-style>
     <style is="custom-style" include="demo-pages-shared-styles">
 
-
+      .buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 5px;
+      }
     </style>
   </custom-style>
 </head>
@@ -57,18 +61,33 @@
   <h3>Basic skeleton-image-uploader demo</h3>
   <demo-snippet>
     <template>
-      <skeleton-image-uploader id="demo1" disabled$="[[!signedIn]]" horizontal content-type="image/jpeg"
-                               metadata='{"customMetadata":{"type":"avatar"}}' path="demo.jpg"
-                               vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
-                               placeholder="./placeholder.jpg"></skeleton-image-uploader>
-      <paper-fab icon="image:photo-camera"
-                 mini
-                 onclick="capture('demo1');"
-                 disabled$="[[disabled]]"
-      ></paper-fab>
+      <skeleton-image-uploader 
+        id="demo1"
+        disabled$="[[!signedIn]]"
+        horizontal
+        content-type="image/jpeg"
+        metadata='{"customMetadata":{"type":"avatar"}}'
+        path="demo.jpg"
+        vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
+        placeholder="./placeholder.jpg"
+      ></skeleton-image-uploader>
+
+      <div class="buttons">
+        <paper-fab
+          icon="image:photo-camera"
+          mini
+          onclick="capture('demo1');"
+          disabled$="[[disabled]]"
+        ></paper-fab>
+        <paper-fab
+          icon="icons:delete"
+          mini
+          onclick="remove('demo1')"
+          disabled$="[[disabled]]"
+        ></paper-fab>
+      </div>
     </template>
   </demo-snippet>
-
 </div>
 
 
@@ -76,15 +95,30 @@
   <h3>Basic skeleton-image-uploader demo</h3>
   <demo-snippet>
     <template>
-      <skeleton-image-uploader id="demo2" disabled$="[[!signedIn]]" circle content-type="image/jpeg"
-                               metadata='{"customMetadata":{"type":"avatar"}}' path="demo.jpg"
-                               vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
-                               placeholder="./placeholder.jpg"></skeleton-image-uploader>
-      <paper-fab icon="image:photo-camera"
-                 mini
-                 onclick="capture('demo2');"
-                 disabled$="[[disabled]]"
-      ></paper-fab>
+      <skeleton-image-uploader 
+        id="demo2"
+        disabled$="[[!signedIn]]"
+        circle content-type="image/jpeg"
+        metadata='{"customMetadata":{"type":"avatar"}}'
+        path="demo.jpg"
+        vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
+        placeholder="./placeholder.jpg"
+      ></skeleton-image-uploader>
+
+      <div class="buttons">
+        <paper-fab
+          icon="image:photo-camera"
+          mini
+          onclick="capture('demo2');"
+          disabled$="[[disabled]]"
+        ></paper-fab>
+        <paper-fab
+          icon="icons:delete"
+          mini
+          onclick="remove('demo2')"
+          disabled$="[[disabled]]"
+        ></paper-fab>
+      </div>
     </template>
   </demo-snippet>
 </div>
@@ -100,6 +134,16 @@
   function capture(id) {
     const element = this.document.getElementById(id);
     element.capture();
+  }
+
+  /**
+   * remove
+   *
+   * @param {string} id
+   */
+  function remove(id) {
+    const element = this.document.getElementById(id);
+    element.remove();
   }
 </script>
 </body>
