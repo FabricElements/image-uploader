@@ -193,6 +193,7 @@
           path: {
             type: String,
             value: null,
+            observer: '_pathChanged',
           },
           imageDataUrl: {
             type: Object,
@@ -306,6 +307,20 @@
             type: String,
             value: '',
           },
+          exist: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true,
+          },
+          /**
+           * Error
+           */
+           error: {
+            type: Object,
+            notify: true,
+            reflectToAttribute: true,
+            value: null,
+          },
         };
       }
 
@@ -332,12 +347,45 @@
       }
 
       /**
-       j * Start taking a picture.
+       * Start taking a picture.
        *
-       * @private
        */
       capture() {
         this.shadowRoot.querySelector('input').click();
+      }
+
+      /**
+       * Path Changed
+       *
+       * @private
+       */
+      _pathChanged() {
+        this.exists = false;
+
+        const pathRef = firebase.storage().ref().child(this.path);
+
+        // Get the download URL
+        pathRef.getDownloadURL()
+          .then(() => this.exists = true)
+          .catch(() => this.exists = false);
+      }
+
+      /**
+       * Remove file from storage
+       *
+       * @return {*}
+       */
+      remove() {
+        if (!this.exists) {
+          return Promise.reject(new Error('File does not exists'));
+        }
+
+        const pathRef = firebase.storage().ref().child(this.path);
+
+        // Get the download URL
+        return pathRef.delete()
+          .then(() => this.src = null)
+          .catch((error) => this.error = error);
       }
 
       /**
@@ -390,6 +438,7 @@
           // For instance, get the download URL: https://firebasestorage.googleapis.com/...
           let downloadURL = uploadTask.snapshot.downloadURL;
           this._dispatchEvent('completed', downloadURL);
+          this._pathChanged();
         });
       }
 
