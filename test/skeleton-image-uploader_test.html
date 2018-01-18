@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+  <title>skeleton-focal test</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../iron-test-helpers/mock-interactions.js"></script>
+
+  <link rel="import" href="../../polymerfire/polymerfire.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
+  <link rel="import" href="../skeleton-image-uploader.html">
+  <style>
+  </style>
+</head>
+<body>
+<!-- Configure Firebase app: -->
+<firebase-app
+  auth-domain="fabricelements.firebaseapp.com"
+  database-url="https://fabricelements.firebaseio.com"
+  api-key="AIzaSyCJRNdR0eodnswyi8MHCtF1YOjY235mhM8"
+  storage-bucket="fabricelements.appspot.com"
+  messagingSenderId="908593247251"
+></firebase-app>
+<test-fixture id="basicImage">
+  <template>
+    <div>
+      <skeleton-image-uploader
+        circle
+        content-type="image/jpeg"
+        metadata='{"customMetadata":{"type":"avatar"}}'
+        path="demo.jpg"
+        vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
+        placeholder="./placeholder.jpg"
+      ></skeleton-image-uploader>
+      <paper-button
+        onclick="capture()"
+      ></paper-button>
+    </div>
+  </template>
+</test-fixture>
+
+<script>
+
+  /**
+   * capture
+   *
+   */
+  function capture() {
+    const element = this.document.querySelector('skeleton-image-uploader');
+    element.capture();
+  }
+
+  suite('basic behavior', () => {
+    let element;
+    let imageUploader;
+    let captureButton;
+
+    setup(() => {
+      stub('skeleton-image-uploader', {
+        capture: function() {
+          console.log('image capture called');
+        },
+      });
+
+      element = fixture('basicImage');
+      captureButton = element.querySelector('paper-button');
+      imageUploader = element.querySelector('skeleton-image-uploader');
+    });
+    test('Should click button to attach image file', (done) => {
+      MockInteractions.tap(captureButton);
+      expect(imageUploader.capture.callCount).to.be.equal(1);
+      done();
+    });
+  });
+</script>
+
+</body>
+</html>
