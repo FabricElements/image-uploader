@@ -312,6 +312,22 @@
             value: false,
             reflectToAttribute: true,
           },
+          maxWidth: {
+            type: Number,
+            value: 2500,
+          },
+          maxHeight: {
+            type: Number,
+            value: 2500,
+          },
+          minWidth: {
+            type: Number,
+            value: 300,
+          },
+          minHeight: {
+            type: Number,
+            value: 300,
+          },
           /**
            * Error
            */
@@ -508,10 +524,10 @@
             if (!this.vision) return this._createImage();
             this._vision(finalImage);
           }, {
-            maxWidth: 1000,
-            maxHeight: 1000,
-            minWidth: 600,
-            minHeight: 600,
+            maxWidth: this.maxWidth,
+            maxHeight: this.maxHeight,
+            minWidth: this.minWidth,
+            minHeight: this.minHeight,
             canvas: true,
           }
         );
