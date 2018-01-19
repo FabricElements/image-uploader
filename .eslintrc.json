@@ -52,9 +52,10 @@
     "firebase": true,
     "fixture": true,
     "flush": true,
+    "loadImage": true,
     "MockInteractions": true,
     "Polymer": true,
-    "WCT": true,
-    "loadImage": true
+    "stub": true,
+    "WCT": true
   }
 }
