@@ -37,7 +37,12 @@
         placeholder="./placeholder.jpg"
       ></skeleton-image-uploader>
       <paper-button
+        id="capture"
         onclick="capture()"
+      ></paper-button>
+      <paper-button
+        id="remove"
+        onclick="remove()"
       ></paper-button>
     </div>
   </template>
@@ -54,6 +59,15 @@
     element.capture();
   }
 
+  /**
+   * remove
+   *
+   */
+  function remove() {
+    const element = this.document.querySelector('skeleton-image-uploader');
+    element.remove();
+  }
+
   suite('basic behavior', () => {
     let element;
     let imageUploader;
@@ -62,17 +76,27 @@
     setup(() => {
       stub('skeleton-image-uploader', {
         capture: function() {
-          console.log('image capture called');
+          console.log('skeleton-image-uploader.capture called');
+        },
+        remove: function() {
+          console.log('skeleton-image-uploader.remove called');
         },
       });
 
       element = fixture('basicImage');
-      captureButton = element.querySelector('paper-button');
+      captureButton = element.querySelector('#capture');
+      removeButton = element.querySelector('#remove');
       imageUploader = element.querySelector('skeleton-image-uploader');
     });
     test('Should click button to attach image file', (done) => {
       MockInteractions.tap(captureButton);
       expect(imageUploader.capture.callCount).to.be.equal(1);
+      done();
+    });
+
+    test('Should click button to remove image file', (done) => {
+      MockInteractions.tap(removeButton);
+      expect(imageUploader.remove.callCount).to.be.equal(1);
       done();
     });
   });
