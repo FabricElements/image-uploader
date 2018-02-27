@@ -524,10 +524,10 @@
             if (!this.vision) return this._createImage();
             this._vision(finalImage);
           }, {
-            maxWidth: this.maxWidth,
-            maxHeight: this.maxHeight,
-            minWidth: this.minWidth,
-            minHeight: this.minHeight,
+            maxWidth: 1000,
+            maxHeight: 1000,
+            minWidth: 600,
+            minHeight: 600,
             canvas: true,
           }
         );
@@ -548,10 +548,10 @@
             const image = this._toBlob(data);
             this._uploadImage(image, this.path);
           }, {
-            maxWidth: 2500,
-            maxHeight: 2500,
-            minWidth: 300,
-            minHeight: 300,
+            maxWidth: this.maxWidth,
+            maxHeight: this.maxHeight,
+            minWidth: this.minWidth,
+            minHeight: this.minHeight,
             canvas: true,
             crop: false,
             meta: true,
