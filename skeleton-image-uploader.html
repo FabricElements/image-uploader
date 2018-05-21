@@ -133,7 +133,7 @@
     <div id="image-container" class="image-container">
       <iron-image
         src$="{{src}}"
-        sizing="cover"
+        sizing="[[sizing]]"
         position="center"
         preload
         fade
@@ -327,6 +327,10 @@
           minHeight: {
             type: Number,
             value: 300,
+          },
+          sizing: {
+            type: String,
+            value: 'cover',
           },
           /**
            * Error
