@@ -375,12 +375,17 @@
       /**
        * Path Changed
        *
+       * @param {string} path
        * @private
        */
-      _pathChanged() {
+      _pathChanged(path) {
+        if (!path) {
+          return;
+        }
+
         this.exists = false;
 
-        const pathRef = firebase.storage().ref().child(this.path);
+        const pathRef = firebase.storage().ref().child(path);
 
         // Get the download URL
         pathRef.getDownloadURL()
@@ -529,7 +534,7 @@
             minWidth: 600,
             minHeight: 600,
             canvas: true,
-          }
+          },
         );
       }
 
@@ -555,7 +560,7 @@
             canvas: true,
             crop: false,
             meta: true,
-          }
+          },
         );
       }
 
