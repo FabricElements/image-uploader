@@ -341,6 +341,30 @@
             reflectToAttribute: true,
             value: null,
           },
+          checkAdult: {
+            type: Boolean,
+            value: false,
+            notify: true,
+            reflectToAttribute: true,
+          },
+          checkMedical: {
+            type: Boolean,
+            value: false,
+            notify: true,
+            reflectToAttribute: true,
+          },
+          checkSpoof: {
+            type: Boolean,
+            value: false,
+            notify: true,
+            reflectToAttribute: true,
+          },
+          checkViolence: {
+            type: Boolean,
+            value: false,
+            notify: true,
+            reflectToAttribute: true,
+          },
         };
       }
 
@@ -383,9 +407,7 @@
        * @private
        */
       _pathChanged(path) {
-        if (!path) {
-          return;
-        }
+        if (!path) return;
 
         this.exists = false;
 
@@ -538,7 +560,7 @@
             minWidth: 600,
             minHeight: 600,
             canvas: true,
-          },
+          }
         );
       }
 
@@ -564,7 +586,7 @@
             canvas: true,
             crop: false,
             meta: true,
-          },
+          }
         );
       }
 
@@ -682,26 +704,30 @@
        * @private
        */
       _validateSafeImage(safeSearchAnnotation) {
-        const isAdult = this._checkSafe(safeSearchAnnotation.adult);
-        const isSpoof = this._checkSafe(safeSearchAnnotation.spoof);
-        const isMedical = this._checkSafe(safeSearchAnnotation.medical);
-        const isViolence = this._checkSafe(safeSearchAnnotation.violence);
-        if (isAdult) {
-          this.imageUnsafeAdult = true;
-        }
-        if (isSpoof) {
-          this.imageUnsafeSpoof = true;
-        }
-        if (isMedical) {
-          this.imageUnsafeMedical = true;
-        }
-        if (isViolence) {
-          this.imageUnsafeViolence = true;
-        }
-        if (!isAdult && !isSpoof && !isMedical && !isViolence) {
-          this._createImage();
-        } else {
+        const topics = [
+          {cmd: 'checkAdult', annotation: 'adult', attr: 'imageUnsafeAdult'},
+          {cmd: 'checkSpoof', annotation: 'spoof', attr: 'imageUnsafeSpoof'},
+          {cmd: 'checkMedical', annotation: 'medical', attr: 'imageUnsafeMedical'},
+          {cmd: 'checkViolence', annotation: 'violence', attr: 'imageUnsafeViolence'},
+        ];
+
+        let someIsUnsafe = false;
+
+        topics.forEach((topic) => {
+          if (
+            this[topic.cmd] &&
+            this._checkSafe(safeSearchAnnotation[topic.annotation])
+          ) {
+            this[topic.attr] = true;
+            someIsUnsafe = true;
+          }
+        });
+
+        if (someIsUnsafe) {
           this._dispatchEvent('validation-error', 'Image is unsafe');
+          this.error = new Error('Image is unsafe');
+        } else {
+          this._createImage();
         }
       }
 
