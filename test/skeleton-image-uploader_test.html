@@ -6,63 +6,58 @@
 
   <title>skeleton-focal test</title>
 
-  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-  <script src="../../web-component-tester/browser.js"></script>
-  <script src="../../iron-test-helpers/mock-interactions.js"></script>
+  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
+  <script src="../node_modules/wct-browser-legacy/browser.js"></script>
+  <script src="../node_modules/firebase/firebase.js"></script>
+  <script src="../node_modules/@fabricelements/firebase-config/index.js"></script>
 
-  <link rel="import" href="../../polymerfire/polymerfire.html">
-  <link rel="import" href="../../paper-button/paper-button.html">
-  <link rel="import" href="../skeleton-image-uploader.html">
-  <style>
-  </style>
+  <script type="module">
+    import '@polymer/iron-test-helpers/mock-interactions.js';
+    import '@polymer/paper-button/paper-button.js';
+    import '../skeleton-image-uploader.js';
+  </script>
 </head>
+
 <body>
-<!-- Configure Firebase app: -->
-<firebase-app
-  auth-domain="fabricelements.firebaseapp.com"
-  database-url="https://fabricelements.firebaseio.com"
-  api-key="AIzaSyCJRNdR0eodnswyi8MHCtF1YOjY235mhM8"
-  storage-bucket="fabricelements.appspot.com"
-  messagingSenderId="908593247251"
-></firebase-app>
-<test-fixture id="basicImage">
-  <template>
-    <div>
-      <skeleton-image-uploader
-        circle
-        content-type="image/jpeg"
-        metadata='{"customMetadata":{"type":"avatar"}}'
-        path="demo.jpg"
-        vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
-        placeholder="./placeholder.jpg"
-      ></skeleton-image-uploader>
-      <paper-button
-        id="capture"
-        onclick="capture()"
-      ></paper-button>
-      <paper-button
-        id="remove"
-        onclick="remove()"
-      ></paper-button>
-    </div>
-  </template>
-</test-fixture>
+  <test-fixture id="basicImage">
+    <template>
+      <div>
+        <skeleton-image-uploader
+          circle
+          content-type="image/jpeg"
+          metadata='{"customMetadata":{"type":"avatar"}}'
+          path="demo.jpg"
+          vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
+          placeholder="./placeholder.jpg"
+        ></skeleton-image-uploader>
+        <paper-button
+          id="capture"
+          onclick="capture()"
+        ></paper-button>
+        <paper-button
+          id="remove"
+          onclick="remove()"
+        ></paper-button>
+      </div>
+    </template>
+  </test-fixture>
+
 <script>
   /* eslint-disable no-unused-vars */
 
   /**
-   * capture
-   *
-   */
+  * capture
+  *
+  */
   function capture() {
     const element = this.document.querySelector('skeleton-image-uploader');
     element.capture();
   }
 
   /**
-   * remove
-   *
-   */
+  * remove
+  *
+  */
   function remove() {
     const element = this.document.querySelector('skeleton-image-uploader');
     element.remove();
@@ -102,6 +97,5 @@
     });
   });
 </script>
-
 </body>
 </html>

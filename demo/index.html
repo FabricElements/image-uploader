@@ -7,18 +7,21 @@
 
   <title>skeleton-image-uploader demo</title>
 
-  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-
-  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
-  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
-  <link rel="import" href="../../polymer/lib/elements/dom-bind.html">
-  <link rel="import" href="../../polymer/lib/elements/dom-if.html">
-  <link rel="import" href="../../polymerfire/polymerfire.html">
-  <link rel="import" href="../../paper-fab/paper-fab.html">
-  <link rel="import" href="../../iron-icons/iron-icons.html">
-  <link rel="import" href="../../iron-icons/image-icons.html">
-  <link rel="import" href="../../skeleton-auth/skeleton-auth.html">
-  <link rel="import" href="../skeleton-image-uploader.html">
+  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js"></script>
+  <script src="../node_modules/firebase/firebase.js"></script>
+  <script src="../node_modules/@fabricelements/firebase-config/index.js"></script>
+  <script type="module">
+    import '@polymer/iron-demo-helpers/demo-pages-shared-styles.js';
+    import '@polymer/iron-demo-helpers/demo-snippet.js';
+    import '@polymer/polymer/lib/elements/dom-bind.js';
+    import '@polymer/polymer/lib/elements/dom-if.js';
+    import '@polymer/paper-fab/paper-fab.js';
+    import '@polymer/iron-icons/iron-icons.js';
+    import '@polymer/iron-icons/image-icons.js';
+    import '@fabricelements/skeleton-auth/skeleton-auth.js';
+  </script>
+  <script type="module" src="../skeleton-image-uploader.js"></script>
 
   <custom-style>
     <style is="custom-style" include="demo-pages-shared-styles">
@@ -28,104 +31,95 @@
         justify-content: space-between;
         margin-top: 5px;
       }
+
+      skeleton-auth {
+        --auth-button: {
+          display: block;
+          text-align: left;
+          border-radius: 20px;
+        };
+      }
     </style>
   </custom-style>
 </head>
-
 <body>
-<!-- Configure Firebase app: -->
-<firebase-app
-  auth-domain="fabricelements.firebaseapp.com"
-  database-url="https://fabricelements.firebaseio.com"
-  api-key="AIzaSyCJRNdR0eodnswyi8MHCtF1YOjY235mhM8"
-  storage-bucket="fabricelements.appspot.com"
-  messagingSenderId="908593247251"
-></firebase-app>
-<dom-bind>
-  <template>
-    <firebase-auth
-      signed-in="{{signedIn}}"
-      user="{{user}}"
-      on-error="handleError">
-    </firebase-auth>
+  <dom-bind>
+    <template>
+      <div hidden="[[signedIn]]">
+        <skeleton-auth google
+                        signed-in="{{signedIn}}"
+                        user="{{user}}"></skeleton-auth>
+      </div>
+    </template>
+  </dom-bind>
 
-    <dom-if if="[[!signedIn]]">
+  <div class="vertical-section-container centered">
+    <h3>Basic skeleton-image-uploader demo</h3>
+    <demo-snippet>
       <template>
-        <skeleton-auth google></skeleton-auth>
+        <skeleton-image-uploader
+          check-adult
+          check-medical
+          check-spoof
+          check-violence
+          id="demo1"
+          disabled$="[[!signedIn]]"
+          horizontal
+          content-type="image/jpeg"
+          metadata='{"customMetadata":{"type":"avatar"}}'
+          path="demo.jpg" vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
+          placeholder="./placeholder.jpg">
+        </skeleton-image-uploader>
+
+        <div class="buttons">
+          <paper-fab
+            icon="image:photo-camera"
+            mini
+            onclick="capture('demo1');"
+            disabled$="[[disabled]]">
+          </paper-fab>
+          <paper-fab
+            icon="icons:delete"
+            mini
+            onclick="remove('demo1')"
+            disabled$="[[disabled]]">
+          </paper-fab>
+        </div>
       </template>
-    </dom-if>
-  </template>
-</dom-bind>
+    </demo-snippet>
+  </div>
 
-<div class="vertical-section-container centered">
-  <h3>Basic skeleton-image-uploader demo</h3>
-  <demo-snippet>
-    <template>
-      <skeleton-image-uploader
-        check-adult
-        check-medical
-        check-spoof
-        check-violence
-        id="demo1"
-        disabled$="[[!signedIn]]"
-        horizontal
-        content-type="image/jpeg"
-        metadata='{"customMetadata":{"type":"avatar"}}'
-        path="demo.jpg"
-        vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
-        placeholder="./placeholder.jpg"
-      ></skeleton-image-uploader>
+  <div class="vertical-section-container centered">
+    <h3>Basic skeleton-image-uploader demo</h3>
+    <demo-snippet>
+      <template>
+        <skeleton-image-uploader
+          id="demo2"
+          disabled$="[[!signedIn]]"
+          circle content-type="image/jpeg"
+          metadata='{"customMetadata":{"type":"avatar"}}'
+          path="demo.jpg"
+          vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
+          placeholder="./placeholder.jpg">
+        </skeleton-image-uploader>
 
-      <div class="buttons">
-        <paper-fab
-          icon="image:photo-camera"
-          mini
-          onclick="capture('demo1');"
-          disabled$="[[disabled]]"
-        ></paper-fab>
-        <paper-fab
-          icon="icons:delete"
-          mini
-          onclick="remove('demo1')"
-          disabled$="[[disabled]]"
-        ></paper-fab>
-      </div>
-    </template>
-  </demo-snippet>
-</div>
-
-
-<div class="vertical-section-container centered">
-  <h3>Basic skeleton-image-uploader demo</h3>
-  <demo-snippet>
-    <template>
-      <skeleton-image-uploader
-        id="demo2"
-        disabled$="[[!signedIn]]"
-        circle content-type="image/jpeg"
-        metadata='{"customMetadata":{"type":"avatar"}}'
-        path="demo.jpg"
-        vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
-        placeholder="./placeholder.jpg"
-      ></skeleton-image-uploader>
-
-      <div class="buttons">
-        <paper-fab
-          icon="image:photo-camera"
-          mini
-          onclick="capture('demo2');"
-          disabled$="[[disabled]]"
-        ></paper-fab>
-        <paper-fab
-          icon="icons:delete"
-          mini
-          onclick="remove('demo2')"
-          disabled$="[[disabled]]"
-        ></paper-fab>
-      </div>
-    </template>
-  </demo-snippet>
-</div>
+        <div class="buttons">
+          <paper-fab
+            icon="image:photo-camera"
+            mini
+            onclick="capture('demo2');"
+            disabled$="[[disabled]]">
+          </paper-fab>
+          <paper-fab
+            icon="icons:delete"
+            mini
+            onclick="remove('demo2')"
+            disabled$="[[disabled]]">
+          </paper-fab>
+        </div>
+      </template>
+    </demo-snippet>
+  </div>
 
 <script>
   /* eslint-disable no-unused-vars */
@@ -151,5 +145,4 @@
   }
 </script>
 </body>
-
 </html>
