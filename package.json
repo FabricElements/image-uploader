@@ -1,18 +1,40 @@
 {
-  "name": "name",
-  "version": "0.0.1",
+  "name": "@fabricelements/skeleton-image-uploader",
+  "version": "3.0.0",
   "license": "BSD-3-Clause",
   "devDependencies": {
+    "@fabricelements/firebase-config": "0.0.1",
+    "@polymer/iron-demo-helpers": "^3.0.0-pre.18",
+    "@webcomponents/webcomponentsjs": "^2.0.0",
     "eslint": "^4.12.1",
     "eslint-config-google": "^0.9.1",
-    "eslint-plugin-html": "^3.2.2"
+    "eslint-plugin-html": "^3.2.2",
+    "wct-browser-legacy": "^0.0.1-pre.11"
   },
   "scripts": {
     "lint": "npm run lint:javascript && polymer lint",
     "lint:javascript": "eslint . --ext js,html --ignore-path .gitignore",
-    "test": "polymer test",
+    "test":"polymer test --npm --skip-plugin sauce",
     "test:integration": "polymer build # test that psk builds without error with the CLI",
     "serve": "polymer serve -H 0.0.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@fabricelements/skeleton-auth": "github:fabricelements/skeleton-auth",
+    "@polymer/iron-ajax": "^3.0.0-pre.18",
+    "@polymer/iron-icons": "^3.0.0-pre.18",
+    "@polymer/iron-image": "^3.0.0-pre.18",
+    "@polymer/iron-test-helpers": "^3.0.0-pre.19",
+    "@polymer/paper-fab": "^3.0.0-pre.18",
+    "@polymer/polymer": "^3.0.0",
+    "blueimp-load-image": "^2.19.0",
+    "firebase": "^5.0.4"
+  },
+  "resolutions": {
+    "inherits": "2.0.3",
+    "samsam": "1.1.3",
+    "supports-color": "3.1.2",
+    "type-detect": "1.0.0",
+    "@webcomponents/webcomponentsjs": "2.0.0-beta.2"
+  },
+  "main": "skeleton-image-uploader.js"
 }

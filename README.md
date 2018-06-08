@@ -1,13 +1,13 @@
 ## \<skeleton-image-uploader\>
 
-`skeleton-image-uploader` is a [Polymer 2](http://polymer-project.org) and [Firebase](https://firebase.google.com/) element for uploading images with a progress indication bar and drag and drop capability.
+`skeleton-image-uploader` is a [Polymer 3](http://polymer-project.org) and [Firebase](https://firebase.google.com/) element for uploading images with a progress indication bar and drag and drop capability.
 
 ## Installation
 
 Install skeleton-image-uploader with Bower
 
 ```shell
-$ bower install --save FabricElements/skeleton-image-uploader
+$ npm install FabricElements/skeleton-carousel --save
 ```
 
 ## Usage
@@ -15,23 +15,14 @@ $ bower install --save FabricElements/skeleton-image-uploader
 Import it into the `<head>` of your page
 
 ```html
-<link rel="import" href="bower_components/skeleton-image-uploader/skeleton-auth.html">
+<script type="module" src="node_modules/@fabricelements/skeleton-image-uploader/skeleton-image-uploader.js"></script>
 ```
 
 ### Example: basic usage
 
 Configure your Firebase app
 
-```html
-<firebase-app
-  apiKey="AIzaSyCJRNdR0eodnswyi8MHCtF1YOjY235mhM8"
-  authDomain="fabricelements.firebaseapp.com"
-  databaseURL="https://fabricelements.firebaseio.com"
-  storageBucket="fabricelements.appspot.com"
-  messagingSenderId="908593247251"
-></firebase-app>
-
-> See [Polymerfire](https://www.webcomponents.org/element/firebase/polymerfire/) docs for more information.
+> See [Firebase](https://firebase.google.com/docs/storage/web/start) docs for more information.
 
 Then add the `skeleton-image-uploader` element.
 
