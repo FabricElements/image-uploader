@@ -4,10 +4,10 @@
 
 ## Installation
 
-Install skeleton-image-uploader with Bower
+Install skeleton-image-uploader with npm
 
 ```shell
-$ npm install FabricElements/skeleton-carousel --save
+$ npm install FabricElements/skeleton-image-uploader --save
 ```
 
 ## Usage
