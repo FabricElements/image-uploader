@@ -14,12 +14,14 @@
   "scripts": {
     "lint": "npm run lint:javascript && polymer lint",
     "lint:javascript": "eslint . --ext js,html --ignore-path .gitignore",
-    "test":"polymer test --npm --skip-plugin sauce",
+    "test": "polymer test --npm --skip-plugin sauce",
     "test:integration": "polymer build # test that psk builds without error with the CLI",
-    "serve": "polymer serve -H 0.0.0.0"
+    "update-types": "gen-typescript-declarations --deleteExisting --outDir ."
+
   },
   "dependencies": {
     "@fabricelements/skeleton-auth": "github:fabricelements/skeleton-auth",
+    "@polymer/gen-typescript-declarations": "^1.2.2",
     "@polymer/iron-ajax": "^3.0.0-pre.18",
     "@polymer/iron-icons": "^3.0.0-pre.18",
     "@polymer/iron-image": "^3.0.0-pre.18",
