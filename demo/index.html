@@ -69,9 +69,9 @@
         id="demo1"
         disabled$="[[!signedIn]]"
         horizontal
-        content-type="image/jpeg"
+        content-type="image/*"
         metadata='{"customMetadata":{"type":"avatar"}}'
-        path="demo.jpg"
+        path="demo"
         vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
         placeholder="./placeholder.jpg"
       ></skeleton-image-uploader>
@@ -102,9 +102,10 @@
       <skeleton-image-uploader
         id="demo2"
         disabled$="[[!signedIn]]"
-        circle content-type="image/jpeg"
+        circle
+        content-type="image/*"
         metadata='{"customMetadata":{"type":"avatar"}}'
-        path="demo.jpg"
+        path="demo"
         vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
         placeholder="./placeholder.jpg"
       ></skeleton-image-uploader>
