@@ -65,9 +65,9 @@
           id="demo1"
           disabled$="[[!signedIn]]"
           horizontal
-          content-type="image/jpeg"
+          content-type="image/*"
           metadata='{"customMetadata":{"type":"avatar"}}'
-          path="demo.jpg" vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
+          path="demo" vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
           placeholder="./placeholder.jpg">
         </skeleton-image-uploader>
 
@@ -96,9 +96,10 @@
         <skeleton-image-uploader
           id="demo2"
           disabled$="[[!signedIn]]"
-          circle content-type="image/jpeg"
+          circle
+          content-type="image/*"
           metadata='{"customMetadata":{"type":"avatar"}}'
-          path="demo.jpg"
+          path="demo"
           vision="AIzaSyDqtR51PSS-Pr9FSUHAKQGkNiy_cqPA9W4"
           placeholder="./placeholder.jpg">
         </skeleton-image-uploader>
@@ -130,7 +131,7 @@
    * @param {string} id
    */
   function capture(id) {
-    const element = this.document.getElementById(id);
+    const element = document.getElementById(id);
     element.capture();
   }
 
@@ -140,7 +141,7 @@
    * @param {string} id
    */
   function remove(id) {
-    const element = this.document.getElementById(id);
+    const element = document.getElementById(id);
     element.remove();
   }
 </script>
