@@ -280,13 +280,8 @@ class SkeletonImageUploader extends GestureEventListeners(PolymerElement) {
       metadata: {
         type: Object,
         value: {
-          contentType: 'image/jpeg',
           customMetadata: {},
         },
-      },
-      finalMetadata: {
-        type: Object,
-        computed: '_computedMetadata(metadata, contentType)',
       },
       disabled: {
         type: Boolean,
@@ -459,10 +454,11 @@ class SkeletonImageUploader extends GestureEventListeners(PolymerElement) {
    * @private
    */
   _uploadImage(image, location) {
+    let fileExt = /\.[\w]+/.exec(this._imageObject.name);
     // create a storage reference
-    const storage = firebase.storage().ref(location);
+    const storage = firebase.storage().ref(location + fileExt);
     // Upload the file
-    const uploadTask = storage.put(image, this.finalMetadata);
+    const uploadTask = storage.put(image, this.metadata);
 
     uploadTask.on('state_changed', (snapshot) => {
       // Observe state change events such as progress, pause, and resume
@@ -547,7 +543,7 @@ class SkeletonImageUploader extends GestureEventListeners(PolymerElement) {
     loadImage(
       this._imageObject,
       (img) => {
-        const finalImage = img.toDataURL('image/jpeg');
+        const finalImage = img.toDataURL(this._imageObject.type);
         this.src = finalImage;
         if (!this.vision) return this._createImage();
         this._vision(finalImage);
@@ -570,10 +566,14 @@ class SkeletonImageUploader extends GestureEventListeners(PolymerElement) {
   _createImage(image) {
     if (!this._imageObject) return;
 
+    if (this._imageObject.type === 'image/gif') {
+      this._uploadImage(this._imageObject, this.path);
+    }
+
     loadImage(
       this._imageObject,
       (data) => {
-        const image = this._toBlob(data);
+        const image = this._toBlob(data, this._imageObject.type);
         this._uploadImage(image, this.path);
       }, {
         maxWidth: this.maxWidth,
@@ -596,7 +596,7 @@ class SkeletonImageUploader extends GestureEventListeners(PolymerElement) {
    * @return {*}
    * @private
    */
-  _toBlob(canvas, type = 'image/jpeg', quality = 0.9) {
+  _toBlob(canvas, type, quality = 0.9) {
     const binStr = atob(canvas.toDataURL(type, quality).split(',')[1]);
     const len = binStr.length;
     const arr = new Uint8Array(len);
@@ -604,7 +604,7 @@ class SkeletonImageUploader extends GestureEventListeners(PolymerElement) {
       arr[i] = binStr.charCodeAt(i);
     }
     return new Blob([arr], {
-      type: type || 'image/jpeg',
+      type: type,
     });
   }
 
@@ -767,26 +767,6 @@ class SkeletonImageUploader extends GestureEventListeners(PolymerElement) {
    */
   _validateImages(visionError, adult, spoof, medical, violence) {
     return !visionError && !adult && !spoof && !medical && !violence;
-  }
-
-  /**
-   * Compute metadata
-   * @param {object} metadata
-   * @param {string} contentType
-   * @return {*}
-   * @private
-   */
-  _computedMetadata(metadata, contentType) {
-    if (!metadata) {
-      return {
-        contentType: 'image/jpeg',
-        customMetadata: {},
-      };
-    }
-    let fileMetadata = {};
-    fileMetadata = metadata;
-    fileMetadata.contentType = contentType;
-    return fileMetadata;
   }
 
   /**
