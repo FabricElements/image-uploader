@@ -191,6 +191,10 @@
             value: null,
             observer: '_pathChanged',
           },
+          extension: {
+            type: String,
+            value: null,
+          },
           imageDataUrl: {
             type: Object,
           },
@@ -397,16 +401,19 @@
        * @param {string} path
        * @private
        */
-      _pathChanged(path) {
-        if (!path) return;
+      _pathChanged(path, fileExt) {
+        if (!path && !fileExt) return;
 
         this.exists = false;
 
-        const pathRef = firebase.storage().ref().child(path);
+        const pathRef = firebase.storage().ref().child(path + fileExt);
 
         // Get the download URL
         pathRef.getDownloadURL()
-          .then(() => this.exists = true)
+          .then(() => {
+            this.exists = true;
+            this.extension = fileExt[0];
+          })
           .catch(() => this.exists = false);
       }
 
@@ -420,7 +427,7 @@
           return Promise.reject(new Error('File does not exists'));
         }
 
-        const pathRef = firebase.storage().ref().child(this.path);
+        const pathRef = firebase.storage().ref().child(this.path + this.extension);
 
         // Get the download URL
         return pathRef.delete()
@@ -479,7 +486,7 @@
           // For instance, get the download URL: https://firebasestorage.googleapis.com/...
           let downloadURL = uploadTask.snapshot.downloadURL;
           this._dispatchEvent('completed', downloadURL);
-          this._pathChanged();
+          this._pathChanged(location, fileExt);
         });
       }
 
