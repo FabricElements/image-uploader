@@ -458,9 +458,9 @@ class SkeletonImageUploader extends GestureEventListeners(PolymerElement) {
     // create a storage reference
     const storage = firebase.storage().ref(location + fileExt);
     // Upload the file
-    const uploadTask = storage.put(image, this.metadata);
+    this.uploadTask = storage.put(image, this.metadata);
 
-    uploadTask.on('state_changed', (snapshot) => {
+    this.uploadTask.on('state_changed', (snapshot) => {
       // Observe state change events such as progress, pause, and resume
       const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
       this.uploadProgress = progress;
@@ -476,11 +476,12 @@ class SkeletonImageUploader extends GestureEventListeners(PolymerElement) {
       this._dispatchEvent('error', error);
       // Handle unsuccessful uploads
     }, () => {
-      // Handle successful uploads on complete
-      // For instance, get the download URL: https://firebasestorage.googleapis.com/...
-      let downloadURL = uploadTask.snapshot.downloadURL;
-      this._dispatchEvent('completed', downloadURL);
-      this._pathChanged();
+      this.uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+        // Handle successful uploads on complete
+        let downloadUrl = downloadURL;
+        this._dispatchEvent('completed', downloadUrl);
+        this._pathChanged();
+      });
     });
   }
 
